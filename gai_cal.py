@@ -1,6 +1,7 @@
 import sys
 import datetime
 import pandas as pd
+from pathlib import Path
 from pycaret.regression import *
 
 def split_otu_by_health(meta_path, otu_path):
@@ -19,22 +20,20 @@ def split_otu_by_health(meta_path, otu_path):
     return healthy_otu_df, nonhealthy_otu_df, predicted_age_df, meta_df, otu_df
 
 
-def model_health_ages(predicted_age_df,otu_df):
+def model_health_ages(predicted_age_df, otu_df, output_dir):
     # Use pycaret to model healthy otu_df and predict the physiological age of the samples
     reg = setup(data=predicted_age_df, target='age', session_id=123, verbose=False)
     best_model = compare_models()
     compare_models_df = pull()
-    compare_models_df.to_csv('compare_models.tsv', sep='\t', index=True)
-
-    tuned_best_model = tune_model(best_model)
+    compare_models_df.to_csv(output_dir / 'compare_models.tsv', sep='\t', index=True)
     tuned_best_model_df = pull()
-    tuned_best_model_df.to_csv('tuned_best_model.tsv', sep='\t', index=True)
+    tuned_best_model_df.to_csv(output_dir / 'tuned_best_model.tsv', sep='\t', index=True)
 
     final_best_model = finalize_model(tuned_best_model)
     age_predictions = predict_model(final_best_model, data=otu_df)
 
     current_date = datetime.datetime.now().strftime("%Y%m%d")
-    save_model(final_best_model, f'final_best_model_{current_date}')
+    save_model(final_best_model, output_dir / f'final_best_model_{current_date}')
 
     return age_predictions
 
@@ -46,7 +45,7 @@ def calculate_raw_gai(meta_df, age_predictions):
     return meta_df
 
 
-def calculate_adjust_value(meta_df):
+def calculate_adjust_value(meta_df, output_dir):
     # Extract raw GAI for healthy individuals
     health_raw_gai = meta_df[meta_df['health'] == 'y']['raw GAI']
 
@@ -61,7 +60,7 @@ def calculate_adjust_value(meta_df):
 
     # Save adjust_values
     adjust_values_df = pd.DataFrame({'age_range': age_ranges, 'adjust_value': adjust_values})
-    adjust_values_df.to_csv('adjust_values.tsv', sep='\t', index=False)
+    adjust_values_df.to_csv(output_dir / 'adjust_values.tsv', sep='\t', index=False)
 
     # Assign adjust values to samples in meta_df based on their age range
     for i, age_range in enumerate(age_ranges):
@@ -85,35 +84,39 @@ def save_result(meta_df, result_path):
     print(f"Saved result as {result_path}")
 
 
-def main(meta_path, otu_path):
+def main(meta_path, otu_path, output_dir):
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
     # Split otu.tsv into healthy and nonhealthy otu dataframes
     healthy_otu_df, nonhealthy_otu_df, predicted_age_df, meta_df, otu_df = split_otu_by_health(meta_path, otu_path)
 
     # Model healthy otu dataframe and predict ages
-    age_predictions = model_health_ages(predicted_age_df,otu_df)
+    age_predictions = model_health_ages(predicted_age_df, otu_df, output_dir)
 
     # Calculate raw GAI for all samples and add it to meta_df
     meta_df = calculate_raw_gai(meta_df, age_predictions)
 
     # Calculate adjust values based on age ranges and add them to meta_df
-    meta_df = calculate_adjust_value(meta_df)
+    meta_df = calculate_adjust_value(meta_df, output_dir)
 
     # Calculate corrected GAI and add it to meta_df
     meta_df = calculate_corrected_gai(meta_df)
 
     # Save final result as result.tsv
-    save_result(meta_df, 'result.tsv')
+    save_result(meta_df, output_dir / 'result.tsv')
 
 
 if __name__ == "__main__":
     # Check if the correct number of arguments is passed
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         print("Invalid arguments! Please provide the paths to meta.tsv and otu.tsv.")
-        print("Usage: python gai_cal.py meta.tsv otu.tsv")
+        print("Usage: python gai_cal.py meta.tsv otu.tsv output_dir")
     else:
         # Get the file paths from command line arguments
         meta_path = sys.argv[1]
         otu_path = sys.argv[2]
+        output_dir = sys.argv[3]
 
         # Call the main function with the file paths
-        main(meta_path, otu_path)
+        main(meta_path, otu_path, output_dir)
