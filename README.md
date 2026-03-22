@@ -48,7 +48,8 @@ Raw GAI = predicted gut age minus chronological age. A positive GAI means the gu
 
 **Important known bug**: The original code skips the 40–45 age bin, causing NaN values for those participants. You should fix this in your implementation.
 
-## Data
+## Download Datasets
 
-Please download datasets from [here](https://dfkide-my.sharepoint.com/:f:/g/personal/yuiw01_dfki_de/IgDlPUOJLyuORa7Npfd1EY3jAV0RJfdffo9KYK6qB7zMu5w?e=wkdtJr)
+Please download the AGP and GGMP datasets from the following link. Both raw and processed data are provided, so you can skip the data preparation step if you want.
 
+[Download AGP and GGMP datasets](https://cloud.dfki.de/owncloud/index.php/s/D8kgi7QjM8LYwyE)
