@@ -18,6 +18,7 @@ def split_otu_by_health(meta_path, otu_path):
     predicted_age_df = pd.merge(healthy_otu_df, meta_df["age"], left_index=True, right_index=True, how='inner')
 
     return healthy_otu_df, nonhealthy_otu_df, predicted_age_df, meta_df, otu_df
+
 class CatBoostRegressorClonable(CatBoostRegressor):
     def __sklearn_clone__(self):
         return CatBoostRegressorClonable(**self.get_params())
@@ -29,8 +30,10 @@ def model_health_ages(predicted_age_df,otu_df):
     compare_models_df = pull()
     compare_models_df.to_csv('compare_models.tsv', sep='\t', index=True)
 
+    if isinstance(best_model, CatBoostRegressor):
+        best_model = CatBoostRegressorClonable(**best_model.get_params())
 
-    tuned_best_model = tune_model(CatBoostRegressorClonable(**best_model.get_params()))
+    tuned_best_model = tune_model(best_model)
     tuned_best_model_df = pull()
     tuned_best_model_df.to_csv('tuned_best_model.tsv', sep='\t', index=True)
 
