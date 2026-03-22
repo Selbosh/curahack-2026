@@ -68,6 +68,7 @@ Please download the AGP and GGMP datasets from the following link. Both raw and 
 
 - Python: 3.11 (recommended)
 - `pip install pycaret==3.3.2`
+- `pip install lightgbm catboost`
 
 ## Contact
 
