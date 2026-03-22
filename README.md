@@ -31,7 +31,7 @@ Before you can improve the pipeline, you need to understand exactly what it does
 
 ### Stage A: Data Acquisition and Preparation
 
-The pipeline downloads 16S rRNA sequencing data from the Qiita database using redbiom. The data comes from two sources: the Guangdong Gut Microbiome Project (GGMP, ~6,014 samples from China) and the American Gut Project (AGP, ~5,966 samples from the US). Both use Illumina 16S V4 region sequencing, processed through the Deblur pipeline for quality filtering. The raw data arrives as BIOM files (a sparse matrix of samples x OTUs), which the prepare_data.py script converts to TSV format.
+The pipeline downloads 16S rRNA sequencing data from the Qiita database using redbiom. The data comes from two sources: the Guangdong Gut Microbiome Project (GGMP, ~6,014 samples from China) and the American Gut Project (AGP, ~5,966 samples from the US). Both use Illumina 16S V4 region sequencing, processed through the Deblur pipeline for quality filtering. The raw data arrives as BIOM files (a sparse matrix of samples x Operational Taxonomic Units (OTUs)), which the prepare_data.py script converts to TSV format.
 
 The critical preprocessing step: OTUs present in fewer than 10% of samples are removed. For GGMP, this reduces the feature space to ~942 OTUs. This prevalence filter eliminates rare, unreliable detections that add noise.
 
@@ -62,9 +62,11 @@ Raw GAI = predicted gut age minus chronological age. A positive GAI means the gu
 ## Getting Started
 
 1. Clone this repository
+
 ```bash
 git clone https://git.opendfki.de/yiwashita/curahack-2026-challenge-5.git
 ```
+
 2. Download datasets as linked above. Both raw and processed data are provided, so you can skip the data preparation step if you want.
 3. Set up a Python (3.11 recommended) environment using the following packages:
 
@@ -73,7 +75,13 @@ pip install numpy==2.4.3 scipy==1.17.1  pandas  matplotlib seaborn scikit-learn 
 pip install redbiom pycaret 
 ```
 
->[!NOTE]
+4. Run the GAI pipeline to reproduce the paper's results:
+
+```bash
+python gai_cal.py [PATH_TO_META_FILE] [PATH_TO_OTU_FILE] [OUTPUT_DIR]
+```
+
+> [!note]
 > Note we are using the latest version of PyCaret, and not the one in the original implementation, in order to use at least reasonably late versions of other packages. If you don't plan on using PyCaret you may want to skip it, in order to use newer packages.
 
 ## Contact
