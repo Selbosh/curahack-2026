@@ -1,10 +1,12 @@
 # curAHack 2026 Challenge 5: Microbiome-Based CVD Prediction
 
-**Challenge leads**: [Kevin Iselborn](mailto:kevin.iselborn@dfki.de) and [Yuichiro Iwashita](mailto:yuichiro.iwashita@dfki.de)
+**Challenge leads**: Kevin Iselborn and Yuichiro Iwashita
 
 Cardiovascular diseases (CVDs) kill 17.9 million people annually. Traditional risk assessment relies on blood tests, imaging, and clinical scores. But the gut microbiome — trillions of bacteria in your intestines — offers a fundamentally different window into cardiovascular health. Specific bacteria  produce metabolites like TMAO (trimethylamine N-oxide), which accelerates atherosclerosis, while others produce short-chain fatty acids (SCFAs) that reduce inflammation and protect the heart.
 
-A 2024 paper by Bao et al. demonstrated that a Gut Age Index (GAI) — the difference between how  old your gut microbiome looks vs. your actual age — can distinguish healthy from unhealthy individuals  with 66–75% balanced accuracy across 20 diseases, including cardiovascular conditions. For CVD  specifically, the paper achieved 68% balanced accuracy in the American Gut Project (AGP) cohort.
+A 2024 paper by Bao et al. demonstrated that a Gut Age Index (GAI) — the difference between how  old your gut microbiome looks vs. your actual age — can distinguish healthy from unhealthy individuals  with 66-75% balanced accuracy across 20 diseases, including cardiovascular conditions. For CVD  specifically, the paper achieved 68% balanced accuracy in the American Gut Project (AGP) cohort.
+
+Paper: Bao, Zhiwei, et al. "Predicting host health status through an integrated machine learning framework: insights from healthy gut microbiome aging trajectory." Scientific Reports 14.1 (2024): 31143. ([Link](https://www.nature.com/articles/s41598-024-82418-3))
 
 ## Task
 Develop a machine learning model that predicts individual cardiovascular risk from 16S microbiome data, leveraging microbial networks and functional patterns. To achieve this, take the GAI pipeline as your starting point and build a better CVD risk  prediction system. The paper’s moderate performance (68% balanced accuracy, estimated AUC 0.58–0.70) leaves substantial room for improvement. Your target is balanced accuracy > 70% and AUC > 0.75.
@@ -48,8 +50,25 @@ Raw GAI = predicted gut age minus chronological age. A positive GAI means the gu
 
 **Important known bug**: The original code skips the 40–45 age bin, causing NaN values for those participants. You should fix this in your implementation.
 
-## Download Datasets
+## Getting Started
+
+### Clone this repository
+
+```bash
+git clone https://git.opendfki.de/yiwashita/curahack-2026-challenge-5.git
+```
+
+### Download Datasets
 
 Please download the AGP and GGMP datasets from the following link. Both raw and processed data are provided, so you can skip the data preparation step if you want.
 
 [Download AGP and GGMP datasets](https://cloud.dfki.de/owncloud/index.php/s/D8kgi7QjM8LYwyE)
+
+### Environment Setup
+
+- Python: 3.11 (recommended)
+- `pip install pycaret==3.3.2`
+
+## Contact
+
+firstname.lastname@dfki.de

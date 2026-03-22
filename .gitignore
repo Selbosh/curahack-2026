@@ -1,0 +1,7 @@
+.venv
+data
+.claude
+*.tsv
+*.pkl
+*.log
+mise.toml

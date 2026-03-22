@@ -21,7 +21,7 @@ def split_otu_by_health(meta_path, otu_path):
 
 def model_health_ages(predicted_age_df,otu_df):
     # Use pycaret to model healthy otu_df and predict the physiological age of the samples
-    reg = setup(data=predicted_age_df, target='age', session_id=123, silent = True)
+    reg = setup(data=predicted_age_df, target='age', session_id=123, verbose=False)
     best_model = compare_models()
     compare_models_df = pull()
     compare_models_df.to_csv('compare_models.tsv', sep='\t', index=True)
@@ -41,7 +41,7 @@ def model_health_ages(predicted_age_df,otu_df):
 
 def calculate_raw_gai(meta_df, age_predictions):
     # Calculate raw GAI by subtracting predicted age from true age and add it as a column in meta_df
-    meta_df['raw GAI'] = age_predictions['Label'] - meta_df['age']
+    meta_df['raw GAI'] = age_predictions['prediction_label'] - meta_df['age']
 
     return meta_df
 
