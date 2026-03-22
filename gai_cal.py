@@ -2,6 +2,7 @@ import sys
 import datetime
 import pandas as pd
 from pathlib import Path
+from catboost import CatBoostRegressor
 from pycaret.regression import *
 
 def split_otu_by_health(meta_path, otu_path):
@@ -19,13 +20,21 @@ def split_otu_by_health(meta_path, otu_path):
 
     return healthy_otu_df, nonhealthy_otu_df, predicted_age_df, meta_df, otu_df
 
+class CatBoostRegressorClonable(CatBoostRegressor):
+    def __sklearn_clone__(self):
+        return CatBoostRegressorClonable(**self.get_params())
 
 def model_health_ages(predicted_age_df, otu_df, output_dir):
     # Use pycaret to model healthy otu_df and predict the physiological age of the samples
-    reg = setup(data=predicted_age_df, target='age', session_id=123, verbose=False)
+    reg = setup(data=predicted_age_df, target='age', session_id=123)#, silent = True)
     best_model = compare_models()
     compare_models_df = pull()
-    compare_models_df.to_csv(output_dir / 'compare_models.tsv', sep='\t', index=True)
+    compare_models_df.to_csv('compare_models.tsv', sep='\t', index=True)
+
+    if isinstance(best_model, CatBoostRegressor):
+        best_model = CatBoostRegressorClonable(**best_model.get_params())
+
+    tuned_best_model = tune_model(best_model)
     tuned_best_model_df = pull()
     tuned_best_model_df.to_csv(output_dir / 'tuned_best_model.tsv', sep='\t', index=True)
 
@@ -108,6 +117,7 @@ def main(meta_path, otu_path, output_dir):
 
 
 if __name__ == "__main__":
+    # TODO update paper's code to actually use argparse
     # Check if the correct number of arguments is passed
     if len(sys.argv) != 4:
         print("Invalid arguments! Please provide the paths to meta.tsv and otu.tsv.")

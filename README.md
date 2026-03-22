@@ -31,6 +31,8 @@ The pipeline downloads 16S rRNA sequencing data from the Qiita database using re
 
 The critical preprocessing step: OTUs present in fewer than 10% of samples are removed. For GGMP, this reduces the feature space to ~942 OTUs. This prevalence filter eliminates rare, unreliable detections that add noise.
 
+You can download unprocessed datasets from [here](https://dfkide-my.sharepoint.com/:f:/g/personal/yuiw01_dfki_de/IgDlPUOJLyuORa7Npfd1EY3jAV0RJfdffo9KYK6qB7zMu5w?e=wkdtJr) and processed ones from [here](https://dfkide-my.sharepoint.com/:f:/g/personal/keis01_dfki_de/IgA4Ypp-ZBSEQ6BSlImKM1YSAYY_4O3YRgWKEKv4FRgyJFA?e=7yMkSQ)
+
 ### Stage B: Health Stratification
 
 The pipeline splits participants into healthy and non-healthy groups. This is the foundation of the entire approach — the age regression model is trained only on healthy people, so it learns the normal aging trajectory. For AGP, healthy means: no cardiovascular disease, no diabetes, no cancer, no IBD, no IBS, no autoimmune disease, no kidney/liver/lung disease, no mental illness, no ASD/Alzheimer's, BMI < 24, and no antibiotic use in the past year.
@@ -52,7 +54,15 @@ Raw GAI = predicted gut age minus chronological age. A positive GAI means the gu
 
 ## Getting Started
 
-### Clone this repository
+1. Download data as linked above.
+2. Setup a python 3.11 environment using the following packages:
+
+````bash
+pip install numpy==2.4.3 scipy==1.17.1  pandas  matplotlib seaborn scikit-learn scikit-bio xgboost lightgbm catboost shap lime numba networkx biom-format h5py openpyxl
+pip install redbiom pycaret 
+````
+Note we are using the current version of pycaret, and not the one in the paper, in order to use at least reasonably late versions of other packages. If you don't plan on using pycaret you may want to skip it, in order to use newer packages.
+
 
 ```bash
 git clone https://git.opendfki.de/yiwashita/curahack-2026-challenge-5.git
