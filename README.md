@@ -2,16 +2,20 @@
 
 **Challenge leads**: Kevin Iselborn and Yuichiro Iwashita
 
+## Introduction
+
 Cardiovascular diseases (CVDs) kill 17.9 million people annually. Traditional risk assessment relies on blood tests, imaging, and clinical scores. But the gut microbiome — trillions of bacteria in your intestines — offers a fundamentally different window into cardiovascular health. Specific bacteria  produce metabolites like TMAO (trimethylamine N-oxide), which accelerates atherosclerosis, while others produce short-chain fatty acids (SCFAs) that reduce inflammation and protect the heart.
 
-A 2024 paper by Bao et al. demonstrated that a Gut Age Index (GAI) — the difference between how  old your gut microbiome looks vs. your actual age — can distinguish healthy from unhealthy individuals  with 66-75% balanced accuracy across 20 diseases, including cardiovascular conditions. For CVD  specifically, the paper achieved 68% balanced accuracy in the American Gut Project (AGP) cohort.
+A 2024 paper by Bao et al. demonstrated that a Gut Age Index (GAI) — the difference between how old your gut microbiome looks vs. your actual age — can distinguish healthy from unhealthy individuals  with 66-75% balanced accuracy across 20 diseases, including cardiovascular conditions. For CVD  specifically, the paper achieved 68% balanced accuracy in the American Gut Project (AGP) cohort.
 
 Paper: Bao, Zhiwei, et al. "Predicting host health status through an integrated machine learning framework: insights from healthy gut microbiome aging trajectory." Scientific Reports 14.1 (2024): 31143. ([Link](https://www.nature.com/articles/s41598-024-82418-3))
 
 ## Task
-Develop a machine learning model that predicts individual cardiovascular risk from 16S microbiome data, leveraging microbial networks and functional patterns. To achieve this, take the GAI pipeline as your starting point and build a better CVD risk  prediction system. The paper’s moderate performance (68% balanced accuracy, estimated AUC 0.58–0.70) leaves substantial room for improvement. Your target is balanced accuracy > 70% and AUC > 0.75.
+
+Develop a machine learning model that predicts individual cardiovascular risk from 16S microbiome data, leveraging microbial networks and functional patterns. To achieve this, take the GAI pipeline as your starting point and build a better CVD risk  prediction system. The paper's moderate performance (68% balanced accuracy, estimated AUC 0.58-0.70) leaves substantial room for improvement. Your target is balanced accuracy > 70% and AUC > 0.75.
 
 What makes this a real research problem:
+
 - The paper used raw OTU counts as features — missing complex microbial interactions and
 functional pathways
 - Microbiome data is compositional (relative abundances sum to a constant) and sparse (many
@@ -31,7 +35,7 @@ The pipeline downloads 16S rRNA sequencing data from the Qiita database using re
 
 The critical preprocessing step: OTUs present in fewer than 10% of samples are removed. For GGMP, this reduces the feature space to ~942 OTUs. This prevalence filter eliminates rare, unreliable detections that add noise.
 
-You can download unprocessed datasets from [here](https://dfkide-my.sharepoint.com/:f:/g/personal/yuiw01_dfki_de/IgDlPUOJLyuORa7Npfd1EY3jAV0RJfdffo9KYK6qB7zMu5w?e=wkdtJr) and processed ones from [here](https://dfkide-my.sharepoint.com/:f:/g/personal/keis01_dfki_de/IgA4Ypp-ZBSEQ6BSlImKM1YSAYY_4O3YRgWKEKv4FRgyJFA?e=7yMkSQ)
+[Download AGP and GGMP datasets](https://cloud.dfki.de/owncloud/index.php/s/D8kgi7QjM8LYwyE)
 
 ### Stage B: Health Stratification
 
@@ -39,47 +43,39 @@ The pipeline splits participants into healthy and non-healthy groups. This is th
 
 ### Stage C: Machine Learning Pipeline
 
-The ML pipeline (gai_cal.py) performs four operations:
+The ML pipeline ([gai_cal.py](./gai_cal.py)) performs four operations:
+
 #### C1. Model Training
 
 Using PyCaret 2.3.5, the script trains multiple regression algorithms (CatBoost, LightGBM, Random Forest, Ridge, Lasso, SVR, KNN, etc.) on the healthy cohort, with OTU  abundances as features and chronological age as the target. The best model is selected by lowest MAE, then hyperparameters are tuned via random grid search. For AGP, CatBoost won; for GGMP, LightGBM won.
 
 #### C2. Age Prediction
+
 The finalized model predicts "gut age" for all participants (healthy and non-healthy). The paper achieved MAE of ~6.8 years, meaning predictions are off by about 6.8 years on average.
 
 #### C3. GAI Calculation
-Raw GAI = predicted gut age minus chronological age. A positive GAI means the gut looks older than expected.C4. Bias Correction: Raw GAI has a systematic bias: young people's ages are overestimated, old people's are underestimated (regression to the mean). The fix: group healthy individuals into age bins (18–20, 20–25, 25–30, ..., 75–100), compute the mean raw GAI per bin, then subtract that bin's mean from everyone in that age range. After correction, healthy people's GAI centers around zero at all ages.
 
-**Important known bug**: The original code skips the 40–45 age bin, causing NaN values for those participants. You should fix this in your implementation.
+Raw GAI = predicted gut age minus chronological age. A positive GAI means the gut looks older than expected.C4. Bias Correction: Raw GAI has a systematic bias: young people's ages are overestimated, old people's are underestimated (regression to the mean). The fix: group healthy individuals into age bins (18-20, 20-25, 25-30, ..., 75-100), compute the mean raw GAI per bin, then subtract that bin's mean from everyone in that age range. After correction, healthy people's GAI centers around zero at all ages.
+
+**Important known bug**: The original code skips the 40-45 age bin, causing NaN values for those participants. You should fix this in your implementation.
 
 ## Getting Started
 
-1. Download data as linked above.
-2. Setup a python 3.11 environment using the following packages:
-
-````bash
-pip install numpy==2.4.3 scipy==1.17.1  pandas  matplotlib seaborn scikit-learn scikit-bio xgboost lightgbm catboost shap lime numba networkx biom-format h5py openpyxl
-pip install redbiom pycaret 
-````
-Note we are using the current version of pycaret, and not the one in the paper, in order to use at least reasonably late versions of other packages. If you don't plan on using pycaret you may want to skip it, in order to use newer packages.
-
-
+1. Clone this repository
 ```bash
 git clone https://git.opendfki.de/yiwashita/curahack-2026-challenge-5.git
 ```
+2. Download datasets as linked above. Both raw and processed data are provided, so you can skip the data preparation step if you want.
+3. Set up a Python (3.11 recommended) environment using the following packages:
 
-### Download Datasets
+```bash
+pip install numpy==2.4.3 scipy==1.17.1  pandas  matplotlib seaborn scikit-learn scikit-bio xgboost lightgbm catboost shap lime numba networkx biom-format h5py openpyxl
+pip install redbiom pycaret 
+```
 
-Please download the AGP and GGMP datasets from the following link. Both raw and processed data are provided, so you can skip the data preparation step if you want.
-
-[Download AGP and GGMP datasets](https://cloud.dfki.de/owncloud/index.php/s/D8kgi7QjM8LYwyE)
-
-### Environment Setup
-
-- Python: 3.11 (recommended)
-- `pip install pycaret==3.3.2`
-- `pip install lightgbm catboost`
+>[!NOTE]
+> Note we are using the latest version of PyCaret, and not the one in the original implementation, in order to use at least reasonably late versions of other packages. If you don't plan on using PyCaret you may want to skip it, in order to use newer packages.
 
 ## Contact
 
-firstname.lastname@dfki.de
+[firstname].[lastname]@dfki.de
