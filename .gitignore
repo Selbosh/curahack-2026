@@ -8,3 +8,4 @@ data
 mise.toml
 catboost_info
 __pycache__
+my_output/
