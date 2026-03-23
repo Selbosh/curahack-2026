@@ -26,13 +26,15 @@ class CatBoostRegressorClonable(CatBoostRegressor):
 
 def model_health_ages(predicted_age_df, otu_df, output_dir):
     # Use pycaret to model healthy otu_df and predict the physiological age of the samples
-    reg = setup(data=predicted_age_df, target='age', session_id=123)#, silent = True)
-    best_model = compare_models()
+    reg = setup(data=predicted_age_df, target='age', session_id=123, use_gpu=True)#, silent = True) ## ADDED GPU
+    best_model = compare_models(exclude=['lightgbm'])
     compare_models_df = pull()
     compare_models_df.to_csv('compare_models.tsv', sep='\t', index=True)
 
     if isinstance(best_model, CatBoostRegressor):
-        best_model = CatBoostRegressorClonable(**best_model.get_params())
+        catboost_params = best_model.get_params()
+        catboost_params.update({'task_type': 'GPU', 'devices': '0'}) ## ADDED GPU
+        best_model = CatBoostRegressorClonable(**catboost_params)
 
     tuned_best_model = tune_model(best_model)
     tuned_best_model_df = pull()
@@ -59,8 +61,8 @@ def calculate_adjust_value(meta_df, output_dir):
     health_raw_gai = meta_df[meta_df['health'] == 'y']['raw GAI']
 
     # Calculate average raw GAI for different age ranges
-    age_ranges = [(18, 20), (20, 25), (25, 30), (30, 35), (35, 40), (45, 50), (50, 55), (55, 60), (60, 65),
-                  (65, 70), (70, 75), (75, 100)]
+    age_ranges = [(18, 20), (20, 25), (25, 30), (30, 35), (35, 40), (40, 45), (45, 50), (50, 55), (55, 60), (60, 65),
+                  (65, 70), (70, 75), (75, 100)] # FIXME: missing age bracket!
     adjust_values = []
     for age_range in age_ranges:
         start_age, end_age = age_range
